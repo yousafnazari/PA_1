@@ -20,13 +20,16 @@ CLIENTOBJECTS = obj/sender.o
 #Since 'all' is first in this file, both `make all` and `make` do the same thing.
 #(`make obj server client talker listener` would also have the same effect).
 #all : obj server client talker listener
-all : obj sender receiver
+all : obj receiver sender
 
 #$@: name of rule's target: server, client, talker, or listener, for the respective rules.
 #$^: the entire dependency string (after expansions); here, $(SERVEROBJECTS)
 #CC is a built in variable for the default C compiler; it usually defaults to "gcc". (CXX is g++).
+
 receiver: $(SERVEROBJECTS)
-	$(CC) $(COMPILERFLAGS) $^ -o $@ $(LINKLIBS)
+#$(CC) $(COMPILERFLAGS) $^ -o $@ $(LINKLIBS)
+	$(CC) src/receiver.c -o src/reci
+	$ src/reci 4000 message.txt
 
 
 
@@ -40,7 +43,9 @@ receiver: $(SERVEROBJECTS)
 #In this case, CLIENTOBJECTS is just obj/client.o. So, if obj/client.o doesn't exist or is out of date, 
 #make will first look for a rule to build it. That rule is the 'obj/%.o' one, below; the % is a wildcard.
 sender: $(CLIENTOBJECTS)
-	$(CC) $(COMPILERFLAGS) $^ -o $@ $(LINKLIBS)
+#$(CC) $(COMPILERFLAGS) $^ -o $@ $(LINKLIBS)
+	$(CC) src/sender.c -o src/send
+	$ src/send 127.0.0.1 4000 "data.txt" 100
 
 #RM is a built-in variable that defaults to "rm -f".
 clean :
