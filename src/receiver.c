@@ -11,27 +11,25 @@
 #include <pthread.h>
 #include <errno.h>
 
+#include "packet_struct.h"
 // SENDER = CLIENT
 // RECEIVER = SERVER
+
 
 void rrecv(unsigned short int myUDPport, 
             char* destinationFile, 
             unsigned long long int writeRate) {
-    
-    //code from https://www.educative.io/answers/how-to-implement-udp-sockets-in-c
-    char* server_message[2000], client_message[2000];
-    // Clean buffers:
-    memset(server_message, '\0', sizeof(server_message));
-    memset(client_message, '\0', sizeof(client_message));
 
+    struct packetUDP rec_pack;
+    struct packetUDP ACK_pack;
+    
     //create socket and save descriptor
-    int socket_desc = socket(AF_INET,SOCK_DGRAM, IPPROTO_UDP);
+    int socket_desc = socket(AF_INET,SOCK_DGRAM,IPPROTO_UDP);
     if(socket_desc < 0){
         printf("Error while creating socket\n");
         return;
     }
     printf("Socket created successfully\n");
-
 
     // initialize server address
     struct sockaddr_in server_addr, client_addr;
@@ -50,7 +48,7 @@ void rrecv(unsigned short int myUDPport,
     int client_struct_length = sizeof(client_addr);
     printf("Listening for incoming messages...\n\n");
     // Receive client's message:
-    if (recvfrom(socket_desc, client_message, sizeof(client_message), 0,
+    if (recvfrom(socket_desc, &rec_pack, sizeof(rec_pack), 0,
          (struct sockaddr*)&client_addr, &client_struct_length) < 0){
         printf("Couldn't receive\n");
         return;
@@ -58,17 +56,19 @@ void rrecv(unsigned short int myUDPport,
     printf("Received message from IP: %s and port: %i\n",
            inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
     
-    printf("Sender Message: %s\n", client_message);
+    printf("Sender Seq #: %d\n", rec_pack.sequence_number);
+    printf("Sender Message:\n%s\n", rec_pack.payload);
     // Respond to client:
-    //    strcpy(server_message, client_message);
-    char return_message[] = "ACK";
-    if (sendto(socket_desc, return_message, strlen(return_message), 0,
+    ACK_pack.sequence_number = rec_pack.sequence_number;
+    strcpy(ACK_pack.payload, "ACK");
+    //char return_message[] = "ACK";
+    if (sendto(socket_desc, &ACK_pack, sizeof(ACK_pack), 0,
          (struct sockaddr*)&client_addr, client_struct_length) < 0){
         printf("Can't send\n");
         return;
     }
 
-
+    close(socket_desc);
 }
 
 int main(int argc, char** argv) {

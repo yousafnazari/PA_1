@@ -11,6 +11,8 @@
 #include <pthread.h>
 #include <errno.h>
 
+#include "packet_struct.h"
+
 // SENDER = CLIENT
 // RECEIVER = SERVER
 
@@ -19,11 +21,6 @@ void rsend(char* hostname,
             char* filename, 
             unsigned long long int bytesToTransfer) 
 {
-    // code from https://www.educative.io/answers/how-to-implement-udp-sockets-in-c
-    char server_message[2000], client_message[2000];
-    // Clean buffers:
-    memset(server_message, '\0', sizeof(server_message));
-    memset(client_message, '\0', sizeof(client_message));
     struct sockaddr_in server_addr;
 
     //create socket
@@ -39,12 +36,10 @@ void rsend(char* hostname,
     int server_struct_length = sizeof(server_addr);
 
     // message to send
-    //char message[] = "Hello, receiver!";
-    // or read from a file
+    // read from a text file
     FILE *file;
     char *message;
     long filelen;
-    printf("%s\n", filename);
     file = fopen(filename, "rb");  // Open the file in binary mode
     if (file == NULL) {
         perror("Error opening file");
@@ -54,29 +49,31 @@ void rsend(char* hostname,
     filelen = ftell(file);             // Get the current byte offset in the file
     rewind(file);                      // Jump back to the beginning of the file
 
-    message = (char *)malloc(filelen * sizeof(char)); // Enough memory for the file
-    fread(message, filelen, 1, file); // Read in the entire file
+    struct packetUDP send_packet;
+    struct packetUDP received_pack;
+    send_packet.sequence_number = 123;
+
+    fread(send_packet.payload, filelen, 1, file); // Read in the entire file
     fclose(file); // Close the file
-    printf("%s\n",message);
-    
+
     // Send the message to server:
-    if(sendto(socket_desc, message, strlen(message), 0,
+    if(sendto(socket_desc, &send_packet, sizeof(send_packet), 0,
          (struct sockaddr*)&server_addr, server_struct_length) < 0){
         printf("Unable to send message\n");
         return;
     }
-    printf("message sent\n");
+    printf("%d - sent\n", send_packet.sequence_number);
 
     // Receive the server's response:
-    if(recvfrom(socket_desc, server_message, sizeof(server_message), 0,
+    if(recvfrom(socket_desc, &received_pack, sizeof(received_pack), 0,
          (struct sockaddr*)&server_addr, &server_struct_length) < 0){
         printf("Error while receiving server's msg\n");
         return;
     }
-    printf("message received: %s\n", server_message);
+    printf("%d - %s\n", received_pack.sequence_number,received_pack.payload); // assumes payload is a string
 
 
-
+    close(socket_desc);
 
 }
 
