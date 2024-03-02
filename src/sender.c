@@ -51,31 +51,47 @@ void rsend(char* hostname,
 
     struct packetUDP send_packet;
     struct packetUDP received_pack;
-    send_packet.sequence_number = 123;
+    send_packet.sequence_number = 0;
+    int bytesRead = 0;
+    int bytesPerPacket = sizeof(send_packet.payload);
+    unsigned char buffer[bytesPerPacket];
+    while ((bytesRead = fread(buffer,1,bytesPerPacket,file)) > 0)
+    {
+        
+        printf("%d bytes read\n",bytesRead);
+        memcpy(send_packet.payload,buffer,bytesPerPacket); // copy from buffer to payload
+        // Send the message to server:
+        if(sendto(socket_desc, &send_packet, sizeof(send_packet), 0,
+            (struct sockaddr*)&server_addr, server_struct_length) < 0){
+            printf("Unable to send message\n");
+            return;
+        }
+        printf("%d - sent\n", send_packet.sequence_number);
 
-    fread(send_packet.payload, filelen, 1, file); // Read in the entire file
+        // Receive the server's response:
+        if(recvfrom(socket_desc, &received_pack, sizeof(received_pack), 0,
+            (struct sockaddr*)&server_addr, &server_struct_length) < 0){
+            printf("Error while receiving server's msg\n");
+            return;
+        }
+        printf("%d - %s\n", received_pack.sequence_number,received_pack.payload); // assumes payload is a string
+        send_packet.sequence_number++;
+        memset(buffer,0,sizeof(buffer));
+       // memset(send_packet.payload,0,sizeof(send_packet.payload));
+        printf("%d\n",strlen(send_packet.payload));
+    }
+    
+    //int bytesRead = fread(buffer, 1, bytesToTransfer, file); // Read in the entire file
+    
+
+
+
     fclose(file); // Close the file
-
-    // Send the message to server:
-    if(sendto(socket_desc, &send_packet, sizeof(send_packet), 0,
-         (struct sockaddr*)&server_addr, server_struct_length) < 0){
-        printf("Unable to send message\n");
-        return;
-    }
-    printf("%d - sent\n", send_packet.sequence_number);
-
-    // Receive the server's response:
-    if(recvfrom(socket_desc, &received_pack, sizeof(received_pack), 0,
-         (struct sockaddr*)&server_addr, &server_struct_length) < 0){
-        printf("Error while receiving server's msg\n");
-        return;
-    }
-    printf("%d - %s\n", received_pack.sequence_number,received_pack.payload); // assumes payload is a string
-
-
     close(socket_desc);
 
 }
+
+
 
 int main(int argc, char** argv) {
     // This is a skeleton of a main function.

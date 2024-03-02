@@ -45,7 +45,7 @@ receiver: $(SERVEROBJECTS)
 sender: $(CLIENTOBJECTS)
 #$(CC) $(COMPILERFLAGS) $^ -o $@ $(LINKLIBS)
 	$(CC) src/sender.c -o src/send
-	$ src/send 127.0.0.1 4000 "data.txt" 100
+	$ src/send 127.0.0.1 4000 "shrek.txt" 1024
 
 #RM is a built-in variable that defaults to "rm -f".
 clean :

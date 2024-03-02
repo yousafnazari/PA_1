@@ -22,7 +22,7 @@ void rrecv(unsigned short int myUDPport,
 
     struct packetUDP rec_pack;
     struct packetUDP ACK_pack;
-    
+    FILE* outFile = fopen(destinationFile,"wb"); 
     //create socket and save descriptor
     int socket_desc = socket(AF_INET,SOCK_DGRAM,IPPROTO_UDP);
     if(socket_desc < 0){
@@ -38,36 +38,56 @@ void rrecv(unsigned short int myUDPport,
     server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
 
     // bind socket
-    if(bind(socket_desc, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0){
-        printf("Couldn't bind to the port\n");
-        return;
+    int bindv;
+    if(bindv = bind(socket_desc, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0){
+        printf("Couldn't bind to the port Bind value: %d\n",bindv);
+        perror("Error");
+        return EXIT_FAILURE;
     }
     printf("Done with binding\n");
 
     // recieve from client address
     int client_struct_length = sizeof(client_addr);
     printf("Listening for incoming messages...\n\n");
+    int recVal = 0;
+    int bytesWritten = 0;
     // Receive client's message:
+    do
+    {
+        recVal = recvfrom(socket_desc, &rec_pack, sizeof(rec_pack), 0,(struct sockaddr*)&client_addr, &client_struct_length);
+    
+        //printf("Received message from IP: %s and port: %i\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+
+        printf("Sender Seq #: %d\n", rec_pack.sequence_number);
+        //printf("%lu bytes received\n",sizeof(rec_pack.payload));
+        //printf("Sender message written to: %s\n", destinationFile);
+        //printf("Sender Message:\n%s\n", rec_pack.payload);
+        // Respond to client:
+        ACK_pack.sequence_number = rec_pack.sequence_number;
+        strcpy(ACK_pack.payload, "ACK");
+        //char return_message[] = "ACK";
+        if (sendto(socket_desc, &ACK_pack, sizeof(ACK_pack), 0,
+             (struct sockaddr*)&client_addr, client_struct_length) < 0){
+            printf("Can't send\n");
+            return;
+        }
+
+        // write received message to file
+        bytesWritten = fwrite(rec_pack.payload,1,sizeof(rec_pack.payload),outFile);
+        printf("%d bytes written\n",bytesWritten);
+        printf("%d\n",strlen(rec_pack.payload));
+        printf("%d\n",sizeof(rec_pack.payload));
+        
+    } while ( strlen(rec_pack.payload) >= sizeof(rec_pack.payload)) ;
+    
+    /*
     if (recvfrom(socket_desc, &rec_pack, sizeof(rec_pack), 0,
          (struct sockaddr*)&client_addr, &client_struct_length) < 0){
         printf("Couldn't receive\n");
         return;
-    }
-    printf("Received message from IP: %s and port: %i\n",
-           inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+    }*/
     
-    printf("Sender Seq #: %d\n", rec_pack.sequence_number);
-    printf("Sender Message:\n%s\n", rec_pack.payload);
-    // Respond to client:
-    ACK_pack.sequence_number = rec_pack.sequence_number;
-    strcpy(ACK_pack.payload, "ACK");
-    //char return_message[] = "ACK";
-    if (sendto(socket_desc, &ACK_pack, sizeof(ACK_pack), 0,
-         (struct sockaddr*)&client_addr, client_struct_length) < 0){
-        printf("Can't send\n");
-        return;
-    }
-
+    fclose(outFile);
     close(socket_desc);
 }
 
