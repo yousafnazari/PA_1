@@ -29,7 +29,7 @@ all : obj receiver sender
 receiver: $(SERVEROBJECTS)
 #$(CC) $(COMPILERFLAGS) $^ -o $@ $(LINKLIBS)
 	$(CC) src/receiver.c -o src/reci
-	$ src/reci 4000 message.txt
+	$ src/reci 4000 message.mp4
 
 
 
@@ -45,7 +45,7 @@ receiver: $(SERVEROBJECTS)
 sender: $(CLIENTOBJECTS)
 #$(CC) $(COMPILERFLAGS) $^ -o $@ $(LINKLIBS)
 	$(CC) src/sender.c -o src/send
-	$ src/send 127.0.0.1 4000 "shrek.txt" 1024
+	$ src/send 127.0.0.1 4000 "BelieveItorNot.mp4" 2048
 
 #RM is a built-in variable that defaults to "rm -f".
 clean :

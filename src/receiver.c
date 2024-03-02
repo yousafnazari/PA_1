@@ -52,17 +52,19 @@ void rrecv(unsigned short int myUDPport,
     int recVal = 0;
     int bytesWritten = 0;
     // Receive client's message:
-    do
+    while (1)
     {
         recVal = recvfrom(socket_desc, &rec_pack, sizeof(rec_pack), 0,(struct sockaddr*)&client_addr, &client_struct_length);
-    
-        //printf("Received message from IP: %s and port: %i\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
 
+        // check for end of transmission message
+        if (strcmp(rec_pack.payload,"FIN") == 0)
+        {
+            break;
+        }
+        
         printf("Sender Seq #: %d\n", rec_pack.sequence_number);
-        //printf("%lu bytes received\n",sizeof(rec_pack.payload));
-        //printf("Sender message written to: %s\n", destinationFile);
-        //printf("Sender Message:\n%s\n", rec_pack.payload);
-        // Respond to client:
+        
+        // Respond to client with ACK:
         ACK_pack.sequence_number = rec_pack.sequence_number;
         strcpy(ACK_pack.payload, "ACK");
         //char return_message[] = "ACK";
@@ -75,18 +77,9 @@ void rrecv(unsigned short int myUDPport,
         // write received message to file
         bytesWritten = fwrite(rec_pack.payload,1,sizeof(rec_pack.payload),outFile);
         printf("%d bytes written\n",bytesWritten);
-        printf("%d\n",strlen(rec_pack.payload));
-        printf("%d\n",sizeof(rec_pack.payload));
         
-    } while ( strlen(rec_pack.payload) >= sizeof(rec_pack.payload)) ;
-    
-    /*
-    if (recvfrom(socket_desc, &rec_pack, sizeof(rec_pack), 0,
-         (struct sockaddr*)&client_addr, &client_struct_length) < 0){
-        printf("Couldn't receive\n");
-        return;
-    }*/
-    
+    };
+ 
     fclose(outFile);
     close(socket_desc);
 }
@@ -108,7 +101,5 @@ int main(int argc, char** argv) {
     char* filename = argv[2];
     
     rrecv(udpPort,filename,1);
-    //close socket
-    //close(socket_desc);
 
 }
