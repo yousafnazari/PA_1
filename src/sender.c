@@ -77,17 +77,18 @@ void rsend(char* hostname,
         printf("%d - %s\n", received_pack.sequence_number,received_pack.payload); // assumes payload is a string
         send_packet.sequence_number++;
         memset(buffer,0,sizeof(buffer));
-       // memset(send_packet.payload,0,sizeof(send_packet.payload));
-        printf("%d\n",strlen(send_packet.payload));
+        memset(send_packet.payload,0,sizeof(send_packet.payload));
     }
     
     //int bytesRead = fread(buffer, 1, bytesToTransfer, file); // Read in the entire file
     
-
-
+    // end connection - FIN
+    memcpy(send_packet.payload,"FIN",bytesPerPacket);
+    sendto(socket_desc, &send_packet, sizeof(send_packet), 0,
+            (struct sockaddr*)&server_addr, server_struct_length);
 
     fclose(file); // Close the file
-    close(socket_desc);
+    close(socket_desc); //close the socket
 
 }
 
