@@ -1,0 +1,3 @@
+read and write bytes from any file type using UDP - jayden
+create/edit udp packet structure with headers, checksums, seq#, payload - jayden
+bandwidth control/optimization (not working) - yousaf
