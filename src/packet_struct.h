@@ -1,3 +1,18 @@
+/** @file packet_struct.h
+ * @brief Structure for packets to include data and sequence number
+ * 
+ * 
+ *
+ *
+ * @author Jayden Sahl (jaydensahl)
+ * @author Yousaf Nazari (yousafnazari)
+ *
+ * @bug No known Bugs.
+ *
+ *
+ */
+
+
 #ifndef PACKET_STRUCT
 #define PACKET_STRUCT
 
@@ -5,7 +20,7 @@
 
 struct packetUDP {
     uint32_t sequence_number;
-    char payload[512]; // Your actual data here
+    char payload[512];
 };
 
 

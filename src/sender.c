@@ -1,3 +1,18 @@
+/** @file sender.c
+ * @brief Sends data over UDP. 
+ * 
+ * Sends packets of raw bytes from the given file to the destination provided.
+ * Uses a loop to send the entire file. Sends one packet then waits for ACK before 
+ * sending the nect packet until the entire file is sent.
+ *
+ *
+ * @author Jayden Sahl (jaydensahl)
+ * @author Yousaf Nazari (yousafnazari)
+ *
+ * @bug No known Bugs.
+ *
+ *
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,6 +30,15 @@
 
 // SENDER = CLIENT
 // RECEIVER = SERVER
+
+/** @brief sends file over UDP to given destination.
+* @param hostname - host IP address
+* @param hostUDPport - host port number
+* @param filename - file to read from
+* @param bytesToTransfer
+*
+* @retval void.
+*/
 
 void rsend(char* hostname, 
             unsigned short int hostUDPport, 
@@ -64,7 +88,8 @@ void rsend(char* hostname,
         if(sendto(socket_desc, &send_packet, sizeof(send_packet), 0,
             (struct sockaddr*)&server_addr, server_struct_length) < 0){
             printf("Unable to send message\n");
-            return;
+            perror("Error");
+            return EXIT_FAILURE;
         }
         printf("%d - sent\n", send_packet.sequence_number);
 
@@ -72,7 +97,8 @@ void rsend(char* hostname,
         if(recvfrom(socket_desc, &received_pack, sizeof(received_pack), 0,
             (struct sockaddr*)&server_addr, &server_struct_length) < 0){
             printf("Error while receiving server's msg\n");
-            return;
+            perror("Error");
+            return EXIT_FAILURE;
         }
         printf("%d - %s\n", received_pack.sequence_number,received_pack.payload); // assumes payload is a string
         send_packet.sequence_number++;
@@ -91,7 +117,13 @@ void rsend(char* hostname,
     close(socket_desc); //close the socket
 
 }
-
+/** @brief Calls the send function to transfer data
+ * 
+ * 
+ *
+ * @return 0 value.
+ *
+ */
 
 
 int main(int argc, char** argv) {
