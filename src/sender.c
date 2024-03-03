@@ -57,7 +57,6 @@ void rsend(char* hostname,
     unsigned char buffer[bytesPerPacket];
     while ((bytesRead = fread(buffer,1,bytesPerPacket,file)) > 0)
     {
-        
         printf("%d bytes read\n",bytesRead);
         memcpy(send_packet.payload,buffer,bytesPerPacket); // copy from buffer to payload
         // Send the message to server:
