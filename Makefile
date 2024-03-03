@@ -33,8 +33,9 @@ receiver: $(SERVEROBJECTS)
 
 
 
+
 #So, how does all of this work? This rule is saying 
-#
+#make
 #"I am how you make the thing called client. If the thing called client is required, but doesn't 
 #exist / is out of date, then the way to make it is to run 
 #`$(CC) $(COMPILERFLAGS) $^ -o $@ $(LINKLIBS)`. 

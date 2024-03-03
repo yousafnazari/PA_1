@@ -3,6 +3,8 @@
     "cmake.configureOnOpen": true,
     "files.associations": {
         "*.py": "python",
-        "socket.h": "c"
+        "socket.h": "c",
+        "inet.h": "c",
+        "stdio.h": "c"
     }
 }

@@ -1,3 +1,17 @@
+/** @file receiver.c
+ * @brief Receives data over UDP. 
+ * 
+ * Receives packets of raw bytes from the sender and writes them to the
+ * destination provided. Uses a loop to read whats incoming until a FIN signal
+ * is received. Responds to every received packet with ACK.
+ *
+ *
+ * @author Jayden Sahl (jaydensahl)
+ * @author Yousaf Nazari (yousafnazari)
+ * 
+ * @bug No known Bugs.
+ *
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,7 +28,14 @@
 #include "packet_struct.h"
 // SENDER = CLIENT
 // RECEIVER = SERVER
-
+/** @brief  Receives packets over UDP and writes to given destination file
+ * 
+ * @param myUDPport - port number
+ * @param destinationFile - file to write to 
+ * @param writeRate - unused
+ *
+ * @return void.
+ */
 
 void rrecv(unsigned short int myUDPport, 
             char* destinationFile, 
@@ -35,7 +56,7 @@ void rrecv(unsigned short int myUDPport,
     struct sockaddr_in server_addr, client_addr;
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(myUDPport); 
-    server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    server_addr.sin_addr.s_addr = inet_addr("127.0.0.1"); 
 
     // bind socket
     int bindv;
@@ -83,7 +104,12 @@ void rrecv(unsigned short int myUDPport,
     fclose(outFile);
     close(socket_desc);
 }
-
+/** @brief Calls the rrecv function to transfer data
+ * 
+ * 
+ * @return 0 value.
+ *
+ */
 int main(int argc, char** argv) {
     // This is a skeleton of a main function.
     // You should implement this function more completely
